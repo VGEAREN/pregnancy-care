@@ -1,78 +1,102 @@
 # pregnancy-care
 
-An OpenClaw skill for managing pregnancy health data via chat.
+OpenClaw skill - 通过聊天管理孕期健康数据。
 
-## Features
+[English](README_EN.md)
 
-- **Report Recognition**: Send checkup report photos, AI extracts and structures the data
-- **Trend Tracking**: Automatically tracks indicator trends across all reports
-- **Ultrasound Management**: Handles both photos and DICOM files
-- **Anomaly Analysis**: Flags abnormal values with pregnancy-specific context
-- **Checkup Planning**: Maintains a checkup timeline based on gestational age
-- **PDF Reports**: Generate comprehensive PDF summary reports
-- **Knowledge Base**: Extensible book-based reference library
+## 功能
 
-## Installation
+- **报告识别**：发送产检报告照片，AI 自动识别、提取关键指标并结构化归档
+- **趋势追踪**：自动按指标类别（血常规、甲功、尿常规等）汇总趋势表
+- **B超管理**：支持普通照片和 DICOM 原始影像，自动提取测量数据
+- **异常分析**：结合孕周参考范围和知识库，区分正常生理变化与需关注异常
+- **产检计划**：基于孕周自动维护产检时间线
+- **PDF 报告**：一键生成包含趋势图表的综合产检报告
+- **知识库**：可扩展的书籍知识库，AI 回答问题时引用具体章节
+
+## 安装
 
 ```bash
-# Install from GitHub
+# 从 GitHub 安装
 openclaw skills install <github-url>
 
-# Or copy manually
+# 或手动复制
 cp -r pregnancy-care ~/.openclaw/skills/
 
-# Install Python dependencies (required)
+# 安装 Python 依赖（必需）
 pip3 install reportlab
 
-# Optional: for DICOM support
+# 可选：DICOM 影像支持
 pip3 install pydicom Pillow numpy
 
-# Optional: for adding books to knowledge base
+# 可选：添加书籍到知识库
 pip3 install ebooklib beautifulsoup4
 ```
 
-## Usage
+## 使用方法
 
-Start a conversation with your OpenClaw bot and send a pregnancy checkup report photo. The skill will guide you through setup on first use.
+首次使用时，skill 会引导你完成初始化（填写基本信息、创建数据目录）。之后：
 
-### Commands
+| 操作 | 方式 |
+|------|------|
+| 录入产检报告 | 发送报告照片 |
+| 录入 B超 | 发送 B超照片或 DICOM ZIP 文件 |
+| 生成 PDF 报告 | 发送"生成PDF报告" |
+| 查询孕期问题 | 直接提问，如"孕早期TSH偏高正常吗" |
+| 添加知识库书籍 | 发送 epub 文件 |
+| 查看产检计划 | 发送"产检计划" |
 
-- Send report photos → automatic recognition + analysis
-- Send ultrasound photos or DICOM ZIP → image management
-- "生成PDF报告" → comprehensive PDF report
-- Ask any pregnancy question → knowledge base lookup
-- Send an epub file → add to knowledge base
+## 知识库
 
-## Knowledge Base
-
-The `references/books/` directory is empty by default (copyright). To add your own books:
+`references/books/` 目录默认为空（版权原因）。你可以添加自己的书籍：
 
 ```bash
-python3 scripts/epub-to-md.py "your-book.epub" "references/books/书名/"
+python3 scripts/epub-to-md.py "你的书.epub" "references/books/书名/"
 ```
 
-Then ask the bot to update the knowledge base index.
+添加后让 bot 更新知识库索引即可。推荐书目：
 
-## Project Structure
+| 书名 | 作者 | 特点 |
+|------|------|------|
+| 梅奥健康怀孕全书（第2版） | 玛拉·魏克 | 权威百科，豆瓣9.3 |
+| 协和产科门诊200问 | 马良坤 | 国内建档/产检流程 |
+| 怀孕呵护指南 | 六层楼先生 | 通俗实用，国内视角 |
+| 范志红详解孕产妇饮食营养全书 | 范志红 | 营养饮食专项 |
+
+## 项目结构
 
 ```
 pregnancy-care/
-├── SKILL.md                  ← Main agent instruction file
+├── SKILL.md                  ← 主指令文件
 ├── references/
-│   ├── INDEX.md              ← Global topic index across all books
-│   ├── indicator-ranges.md   ← Pregnancy indicator reference ranges
-│   └── books/                ← Knowledge base books (user adds)
+│   ├── INDEX.md              ← 全局主题索引
+│   ├── indicator-ranges.md   ← 孕期指标参考范围
+│   └── books/                ← 知识库书籍（用户自行添加）
 ├── scripts/
-│   ├── epub-to-md.py         ← Convert epub to per-chapter Markdown
-│   ├── dicom-export.py       ← DICOM ZIP to JPG export
-│   └── generate-pdf.py       ← Generate comprehensive PDF report
-└── assets/                   ← Runtime output
+│   ├── epub-to-md.py         ← epub 转 Markdown
+│   ├── dicom-export.py       ← DICOM 转 JPG
+│   └── generate-pdf.py       ← 生成 PDF 报告
+└── assets/                   ← 运行时输出
 ```
 
-## Disclaimer
+## 数据存储
 
-All analysis is for reference only and does not constitute medical advice. Consult your doctor for any health concerns.
+所有数据以 Markdown 文件存储在工作区的 `pregnancy/` 目录下：
 
-## License
+```
+pregnancy/
+├── profile.md       ← 基本信息（姓名、年龄、预产期）
+├── summary.md       ← 指标趋势表 + 产检计划
+├── records/         ← 结构化报告
+├── reports/         ← 原始报告图片
+├── ocr_results/     ← 识别原文
+└── ultrasound/      ← B超影像
+```
+
+## 免责声明
+
+所有分析仅供参考，不构成医学建议。异常指标请及时咨询专业医生。
+
+## 许可证
 
 MIT
