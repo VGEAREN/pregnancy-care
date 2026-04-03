@@ -16,12 +16,21 @@ OpenClaw skill - 通过聊天管理孕期健康数据。
 
 ## 安装
 
-```bash
-# 从 GitHub 安装
-openclaw skills install <github-url>
+### 方式一：让 OpenClaw 自动安装（推荐）
 
-# 或手动复制
-cp -r pregnancy-care ~/.openclaw/skills/
+把下面这段话直接发给你的 OpenClaw bot：
+
+> 请帮我安装 pregnancy-care skill。
+> 1. 克隆仓库：`git clone https://github.com/VGEAREN/pregnancy-care.git ~/.openclaw/skills/pregnancy-care`
+> 2. 安装必需依赖：`pip3 install reportlab`
+> 3. 可选依赖：`pip3 install pydicom Pillow numpy ebooklib beautifulsoup4`
+> 4. 确认安装成功：`ls ~/.openclaw/skills/pregnancy-care/SKILL.md`
+
+### 方式二：命令行安装
+
+```bash
+# 克隆到 skill 目录
+git clone https://github.com/VGEAREN/pregnancy-care.git ~/.openclaw/skills/pregnancy-care
 
 # 安装 Python 依赖（必需）
 pip3 install reportlab

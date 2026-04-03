@@ -16,12 +16,21 @@ An OpenClaw skill for managing pregnancy health data via chat.
 
 ## Installation
 
-```bash
-# Install from GitHub
-openclaw skills install <github-url>
+### Option 1: Let OpenClaw self-install (recommended)
 
-# Or copy manually
-cp -r pregnancy-care ~/.openclaw/skills/
+Send this message to your OpenClaw bot:
+
+> Please install the pregnancy-care skill:
+> 1. Clone: `git clone https://github.com/VGEAREN/pregnancy-care.git ~/.openclaw/skills/pregnancy-care`
+> 2. Install dependency: `pip3 install reportlab`
+> 3. Optional deps: `pip3 install pydicom Pillow numpy ebooklib beautifulsoup4`
+> 4. Verify: `ls ~/.openclaw/skills/pregnancy-care/SKILL.md`
+
+### Option 2: Command line
+
+```bash
+# Clone to skill directory
+git clone https://github.com/VGEAREN/pregnancy-care.git ~/.openclaw/skills/pregnancy-care
 
 # Install Python dependencies (required)
 pip3 install reportlab
