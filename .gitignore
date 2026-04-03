@@ -1,0 +1,16 @@
+# User data (created at runtime in workspace)
+pregnancy/
+
+# Generated assets
+assets/*.pdf
+
+# Python
+__pycache__/
+*.pyc
+
+# OS
+.DS_Store
+
+# Knowledge base books (copyright, users add their own)
+references/books/*/
+!references/books/.gitkeep
