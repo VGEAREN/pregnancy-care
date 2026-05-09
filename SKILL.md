@@ -1,7 +1,7 @@
 ---
 name: pregnancy-care
-version: 1.0.0
-description: "孕期健康管理助手：发送产检报告照片自动识别归档，追踪指标趋势，管理B超影像(含DICOM)，异常分析，产检计划，生成PDF报告，孕期知识库查询"
+version: 1.1.0
+description: "孕期健康管理助手：产检报告/B超/DICOM 自动识别归档，指标趋势，异常分析，产检计划，PDF 报告，孕期知识库。与 family-health skill 互为礼让（仅孕妇本人 + 孕期相关）"
 metadata: {"openclaw":{"emoji":"🤰","requires":{"anyBins":["python3"]}}}
 ---
 
@@ -13,7 +13,32 @@ metadata: {"openclaw":{"emoji":"🤰","requires":{"anyBins":["python3"]}}}
 
 ## 何时激活
 
-当用户的消息涉及以下场景时激活此 skill：
+按以下顺序判断本 skill 是否接管（与 family-health skill 互为礼让）：
+
+### 1. 词义信号优先（按整体语义）
+
+**本 skill 接管的语义**：产检 / 孕周 / 胎儿 / NT / 唐筛 / 无创 / NIPT / 胎心 / 胎盘 / OGTT / 胎动 / B超影像（孕检上下文）
+
+**让位给 family-health 的语义**（如果 family-health skill 已安装）：体检报告 / 化验单 / 检查报告 / CT / MRI / 钼靶 / 胃肠镜 / DXA / 心电图 / 24h 动态血压
+
+**歧义词**（B超 / 超声 / 血常规 / 尿常规）按上下文判断："21周B超" 由本 skill 处理，"妈妈乳腺B超"让位 family-health。
+
+### 2. 无明显词义时（用户只丢 PDF/图片）
+
+**必须先看** 工作区是否存在 `family-health/members.md`（family-health skill 已被使用过）：
+- 文件存在 → OCR 提取报告里的姓名 → 与 `pregnancy/profile.md` 中的孕妇姓名比对
+  - **匹配** → 本 skill 接管（孕妇本人的所有报告都归这里）
+  - **不匹配** → 让位给 family-health
+- 文件不存在（family-health 未启用或新工作区）→ 本 skill 直接接管
+
+### 3. 用户显式说明永远覆盖前两步
+
+- "归到孕期档案" → 强制本 skill 接管
+- "这是体检不是产检" → 让位给 family-health
+
+### 触发场景示例
+
+下面任一场景时由本 skill 接管：
 - 发送产检报告照片或 B超影像
 - 询问产检指标是否正常
 - 请求生成产检报告 PDF
