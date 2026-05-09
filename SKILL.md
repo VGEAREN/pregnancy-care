@@ -1,6 +1,6 @@
 ---
 name: pregnancy-care
-version: 1.2.0
+version: 1.2.1
 description: "孕期健康管理助手：产检报告/B超/DICOM 自动识别归档，指标趋势，异常分析，产检计划，PDF 报告，孕期知识库。与 family-health skill 互为礼让（仅孕妇本人 + 孕期相关）"
 metadata: {"openclaw":{"emoji":"🤰","requires":{"anyBins":["python3"]}}}
 ---
@@ -216,6 +216,7 @@ summary.md 中按指标类别维护趋势表：
 
 ## 失败处理
 
+- **image 识别工具报错**（如 `Failed to optimize image`）：OpenClaw 平台问题，**不要重试同一张**。告知用户具体错误，提供 3 个选项：① 重新拍摄（光线足/对焦清/避免反光） ② 改发 PDF 版本 ③ 大图压缩或拆成小图分次发
 - **图片识别失败**：如果无法从图片中提取文字，告知用户"图片清晰度不足或格式不支持，请重新拍照（建议正面拍摄、光线充足、避免反光）"
 - **Python 依赖缺失**：脚本执行报错 ImportError 时，向用户展示具体缺失的包和安装命令，不继续执行后续步骤
 - **DICOM 处理失败**：告知用户具体错误，建议改为直接发送 B超照片
