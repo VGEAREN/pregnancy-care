@@ -1,6 +1,6 @@
 ---
 name: pregnancy-care
-version: 1.2.1
+version: 1.3.0
 description: "孕期健康管理助手：产检报告/B超/DICOM 自动识别归档，指标趋势，异常分析，产检计划，PDF 报告，孕期知识库。与 family-health skill 互为礼让（仅孕妇本人 + 孕期相关）"
 metadata: {"openclaw":{"emoji":"🤰","requires":{"anyBins":["python3"]}}}
 ---
@@ -79,6 +79,15 @@ pregnancy/
 
 4. 创建初始 summary.md（含空的趋势表和标准产检时间表）
 5. 检查 Python 依赖：`python3 -c "import reportlab" 2>/dev/null`，缺失则提示：`pip3 install reportlab pydicom Pillow`
+6. **初始化 `pregnancy/` 为本地 git 仓库**（详见后文「数据版本管理」段）：
+   ```bash
+   cd pregnancy
+   git init -b master
+   git config user.email "openclaw-skill@local"
+   git config user.name "openclaw-skill"
+   printf '.DS_Store\n*.swp\n*.tmp\n' > .gitignore
+   git add -A && git commit -m "chore: pregnancy data init"
+   ```
 
 ## 工作流
 
@@ -118,7 +127,8 @@ pregnancy/
    - 引用来源（如"根据《梅奥健康怀孕全书》第X章"）
 8. **更新趋势**：读取所有 `pregnancy/records/` 文件，按指标类别更新 `pregnancy/summary.md` 中的趋势表
 9. **更新产检计划**：将本次检查标记为已完成，更新下次产检建议
-10. **向用户汇报**：列出本次检查的关键发现、异常指标分析、下次产检建议
+10. **自动 commit**：`cd pregnancy && git add -A && git commit -m "feat: 入库 YYYY-MM-DD <类型> 报告（孕 NWw）"`（详见「数据版本管理」段）
+11. **向用户汇报**：列出本次检查的关键发现、异常指标分析、下次产检建议
 
 ### 收到 B超影像
 
@@ -128,13 +138,14 @@ pregnancy/
 3. 写入 `pregnancy/ultrasound/YYYY-MM-DD/ocr_results.md`
 4. 生成结构化报告到 `pregnancy/records/YYYY-MM-DD-ultrasound.md`
 5. 更新 summary.md 中的胎儿发育趋势表
+6. 自动 commit：`cd pregnancy && git add -A && git commit -m "feat: 入库 YYYY-MM-DD B超报告（孕 NWw）"`
 
 **DICOM 文件（ZIP 包）**：
 1. 将 ZIP 保存到 `pregnancy/ultrasound/YYYY-MM-DD/`
 2. 执行：`python3 {baseDir}/scripts/dicom-export.py pregnancy/ultrasound/YYYY-MM-DD/archive.zip pregnancy/ultrasound/YYYY-MM-DD/`
 3. 脚本自动解压、解析 DICOM、导出 JPG
 4. 逐张读取导出的 JPG 提取测量数据
-5. 后续同普通照片流程
+5. 后续同普通照片流程（含 git commit 收尾）
 
 ### 用户请求 PDF 报告
 
@@ -262,3 +273,49 @@ summary.md 中按指标类别维护趋势表：
 5. 向用户汇报关键发现
 
 如果跳过第 1 步只做第 3 步（只录入文字结果），原图就永久丢失了。
+
+## 数据版本管理（本地 git）
+
+`pregnancy/` 是一个**本地 git 仓库**，所有数据改动自动 commit 形成可回溯历史。这是「原图保护规则」的延伸——多一层"误删能 revert"的保险。
+
+### 初始化（见上文「初始化」段第 6 步）
+
+首次创建 `pregnancy/` 时一次性完成 `git init` + `.gitignore` + 首次 commit。
+
+### 何时自动 commit
+
+任何**写文件操作**收尾时统一 commit。不要每写一个文件 commit 一次，而是按"用户语义"成组提交：
+
+| 触发动作 | commit message 模板 |
+|---------|---------------------|
+| 入库一份产检报告（含落盘三件套+趋势+计划） | `feat: 入库 YYYY-MM-DD <类型> 报告（孕 NWw）` |
+| 入库 B 超影像 | `feat: 入库 YYYY-MM-DD B超报告（孕 NWw）` |
+| 入库 DICOM 解压后的 JPG | `feat: 入库 YYYY-MM-DD DICOM B超（孕 NWw）` |
+| 修改孕妇档案（profile） | `chore: 更新孕妇档案 <字段>` |
+| 添加知识库书籍（epub） | `feat: 知识库添加《<书名>》` |
+| 生成综合 PDF | `chore: 生成综合 PDF 报告 YYYY-MM-DD` |
+| 让位给 family-health（挪报告） | `fix: 移动 YYYY-MM-DD 报告到 family-health（误归位）` |
+
+具体命令：
+```bash
+cd pregnancy && git add -A && git commit -m "<对应模板>"
+```
+
+### 撤销误操作
+
+用户说"撤销刚才的归档" / "退回到上一份报告之前" 等：
+1. 展示最近 5 个 commit：`cd pregnancy && git log --oneline -5`
+2. 询问用户撤回到哪个 commit
+3. 用 `git revert <SHA>`（保留撤销历史），**不要**用 `git reset --hard`（丢历史）
+4. 即使 revert 了"入库"的 commit，原图文件**仍保留在 `reports/`**（git 删了引用，磁盘文件不删；这是 git revert 默认行为，需要的话用 `git revert` 后再 `git add reports/ && git commit --amend` 让原图 staged 回来）
+
+### 不要 push
+
+- ⚠️ **绝对不要**配置任何远程仓库（不要 `git remote add ...`）
+- ⚠️ **不要**推到 GitHub/GitLab/任何公网
+- 家庭医疗数据是高度敏感信息，本地 git 仅作历史回溯用
+- 备份让用户自己用 rsync / Time Machine / 移动硬盘等离线方式
+
+### 安静运行
+
+git commit 是自动的"维护动作"，不要每次都向用户汇报"已 commit"。仅在用户问"上次改了啥" / "撤销" / "查历史" 时才主动展示 `git log`。
